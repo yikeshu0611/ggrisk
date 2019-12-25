@@ -1,0 +1,23 @@
+Package: ggrisk
+Title: Risk Plot for Cox Regression
+Version: 1.0
+Authors@R: 
+    c(
+    person("Jing","Zhang",role = c("aut", "cre"),email = "zj391120@163.com"),
+    person("Zhi", "Jin", role="aut")
+    )
+Description: Risk Plot for Cox Regression.
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.1.1
+Imports: 
+    ggplot2,
+    do,
+    set,
+    survival,
+    cutoff,
+    fastStat,
+    egg
+URL: https://github.com/yikeshu0611/ggrisk
+BugReports: https://github.com/yikeshu0611/ggrisk/issues
