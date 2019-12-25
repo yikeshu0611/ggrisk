@@ -93,9 +93,7 @@ ggrisk <- function(data,time,event,
         cut.position=which.min(abs(data4$riskscore - cutoff.point))
     }
     if (length(cut.position)>1){
-        cut.position=cut.position[length(cut.position)]+1
-    }else{
-        cut.position=cut.position+1
+        cut.position=cut.position[length(cut.position)]
     }
     #figure A risk plot
     fA = ggplot2::ggplot(data = data4, aes(x = 1:nrow(data4),
