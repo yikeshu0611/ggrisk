@@ -6,18 +6,25 @@ Authors@R:
     person("Jing","Zhang",role = c("aut", "cre"),email = "zj391120@163.com"),
     person("Zhi", "Jin", role="aut")
     )
-Description: Risk Plot for Cox Regression.
+Description: The risk plot may be the most commonly used figure in the analysis 
+    of tumor genetic data. We can conclude the following two points: Comparing 
+    the prediction results of the model with the real survival situation to see 
+    whether the survival rate of the high-risk group is lower than that of the 
+    low-level group, and whether the survival time of the high-risk group is 
+    shorter than that of the low-risk group. The other is to compare the heat 
+    map and scatter plot to see the correlation between the predictors and the 
+    outcome.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.0.2
+RoxygenNote: 6.1.1
 Imports: 
     ggplot2,
+    survival,
+    egg,
     do,
     set,
-    survival,
     cutoff,
-    fastStat,
-    egg
+    fastStat
 URL: https://github.com/yikeshu0611/ggrisk
 BugReports: https://github.com/yikeshu0611/ggrisk/issues

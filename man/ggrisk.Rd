@@ -4,18 +4,13 @@
 \alias{ggrisk}
 \title{Risk Plot for Cox Regression}
 \usage{
-ggrisk(
-  data,
-  time,
-  event,
-  cutoff = "roc",
-  lab = list(fA.ylab = "Risk Score", fB.ylab = "Survival Time"),
-  legend = list(fA.title = "Risk Group", fB.title = "Status", fC.title = "Expression"),
-  size = list(ylab = 14, fAB.points = 2, fAB.vline = 1, fAB.legendtitle = 12,
-    fAB.legendtext = 10),
-  height.ratio = c(0.1, 0.1, 0.01, 0.15),
-  family = "serif"
-)
+ggrisk(data, time, event, cutoff = "roc", cutoff.show = list(show =
+  TRUE, x = NULL, y = NULL, label = NULL, size = 5), lab = list(fA.ylab =
+  "Risk Score", fB.ylab = "Survival Time"), legend = list(fA.title =
+  "Risk Group", fB.title = "Status", fC.title = "Expression"),
+  size = list(ylab = 14, fAB.points = 2, fAB.vline = 1, fAB.legendtitle =
+  12, fAB.legendtext = 10), height.ratio = c(0.1, 0.1, 0.01, 0.15),
+  family = "serif")
 }
 \arguments{
 \item{data}{dataframe data}
@@ -25,6 +20,9 @@ ggrisk(
 \item{event}{variable name for event time}
 
 \item{cutoff}{a number or string, which can be roc, median or cutoff}
+
+\item{cutoff.show}{a list contains a logical argument show, default is TRUE,
+x and y coordinates, label and size.}
 
 \item{lab}{ylab for figure A and B}
 
@@ -49,5 +47,11 @@ ggrisk(
     data=mtcars,
     time='qsec',
     event='am'
+    )
+ggrisk(
+    data=mtcars,
+    time='qsec',
+    event='am',
+    cutoff.show=list(show=FALSE)
     )
 }

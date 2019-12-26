@@ -4,6 +4,8 @@
 #' @param time variable name for following time
 #' @param event variable name for event time
 #' @param cutoff a number or string, which can be roc, median or cutoff
+#' @param cutoff.show a list contains a logical argument show, default is TRUE,
+#'     x and y coordinates, label and size.
 #' @param lab ylab for figure A and B
 #' @param legend legend title for figure A, B and C
 #' @param size size for y-axis labels, points, vertical line, legend title,
@@ -11,7 +13,7 @@
 #' @param height.ratio relative height
 #' @param family family
 #' @importFrom ggplot2 aes aes_string geom_point geom_vline theme element_blank element_text scale_colour_hue
-#' @importFrom ggplot2 ylab geom_tile unit scale_fill_gradient2 scale_x_continuous geom_raster theme_classic
+#' @importFrom ggplot2 ylab geom_tile unit scale_fill_gradient2 scale_x_continuous geom_raster theme_classic annotate
 #' @importFrom stats as.formula median sd
 #' @return a ggplot picture
 #' @export
@@ -23,8 +25,20 @@
 #'     time='qsec',
 #'     event='am'
 #'     )
+#' ggrisk(
+#'     data=mtcars,
+#'     time='qsec',
+#'     event='am',
+#'     cutoff.show=list(show=FALSE)
+#'     )
 ggrisk <- function(data,time,event,
                    cutoff='roc',
+                   cutoff.show=list(show=TRUE,
+                     x=NULL,
+                     y=NULL,
+                     label=NULL,
+                     size=5
+                     ),
                    lab=list(fA.ylab='Risk Score',
                             fB.ylab='Survival Time'),
                    legend=list(fA.title='Risk Group',
@@ -99,7 +113,7 @@ ggrisk <- function(data,time,event,
     data4[, time]=round(data4[, time],1)
     #figure A risk plot
     fA = ggplot2::ggplot(data = data4, aes(x = 1:nrow(data4),
-                                  y = data4$riskscore)) +
+                                           y = data4$riskscore)) +
         geom_point(aes(colour = fAB.color,
                        group = `Risk Group`),
                    size = size$fAB.points) +
@@ -118,15 +132,27 @@ ggrisk <- function(data,time,event,
             axis.title.y = element_text(size = size$ylab),
             legend.title = element_text(size = size$fAB.legendtitle),
             legend.text = element_text(size = size$fAB.legendtext)
-        ) + 
+        ) +
         scale_colour_hue(legend$fA,
                          labels = lab.A) +
         ylab(lab$fA.ylab)+
         theme(axis.title.y = element_text(
             angle = ylab.angle['AB'],
             family=family)
-              )+
-      scale_x_continuous(expand = c(0,0.3))
+        )+
+        scale_x_continuous(expand = c(0,0.4))
+    if (cutoff.show$show){
+        fA=fA+ annotate("text",
+                    x=ifelse(is.null(cutoff.show$x),
+                             cut.position+3,cutoff.show$x),
+                    y=ifelse(is.null(cutoff.show$y),cutoff.point,cutoff.show$y),
+                    label=paste0('cutoff: ',
+                               round(cutoff.point,2)),
+                    family=family,
+                    fontface="plain",
+                    colour="black",
+                    size=cutoff.show$size)
+    }
     #fB
     if (cutoff::judge_123(order(color$fAB))) {
         fB.cor = ifelse(data4[, event] == 1, color$fAB[1], color$fAB[2])
@@ -136,7 +162,7 @@ ggrisk <- function(data,time,event,
         lab.B = c('Alive', 'Dead')
     }
     fB=ggplot2::ggplot(data = data4,
-                         aes(x = 1:nrow(data4), y = data4[, time])) +
+                       aes(x = 1:nrow(data4), y = data4[, time])) +
         geom_point(aes(color = fB.cor,
                        group = data4[, event]),
                    size = size$fAB.points) +
@@ -159,7 +185,7 @@ ggrisk <- function(data,time,event,
         scale_colour_hue(legend$fB, labels = lab.B) +
         ylab(lab$fB.ylab)+
         theme(axis.title.y = fA$theme$axis.title.y)+
-      scale_x_continuous(expand = c(0,0.3))
+        scale_x_continuous(expand = c(0,0.4))
     # middle
     middle = ggplot2::ggplot(data4, aes(
         x = 1:nrow(data4),
@@ -178,7 +204,7 @@ ggrisk <- function(data,time,event,
             legend.text = element_text(size = size$fAB.legendtext),
             plot.margin = unit(c(0.15,0,-0.3,0), "cm")
         )+
-      scale_x_continuous(expand = c(0,0.3))
+        scale_x_continuous(expand = c(0,0.4))
 
     #fC
     data5 = data4[, set::not(colnames(data4), c(time, event,
@@ -194,7 +220,7 @@ ggrisk <- function(data,time,event,
     fA.title.style$family=family
     fA.title.style$angle=ylab.angle['C']
     fC = ggplot2::ggplot(data7, aes_string(x = 'id', y = 'variable',
-                           fill = 'value')) +
+                                           fill = 'value')) +
         geom_raster() +
         theme(
             panel.grid = element_blank(),
@@ -214,15 +240,15 @@ ggrisk <- function(data,time,event,
             high = color$fC[3]
         ) + theme(
             axis.text = fA.title.style)+
-      scale_x_continuous(expand = c(0,0.3))
+        scale_x_continuous(expand = c(0,0.4))
     fC
-   egg::ggarrange(
-      fA,
-      fB,
-      middle,
-      fC,
-      ncol = 1,
-      labels = c('A', 'B', 'C', ''),
-      heights = height.ratio
+    egg::ggarrange(
+        fA,
+        fB,
+        middle,
+        fC,
+        ncol = 1,
+        labels = c('A', 'B', 'C', ''),
+        heights = height.ratio
     )
 }
