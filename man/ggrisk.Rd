@@ -10,7 +10,7 @@ ggrisk(data, time, event, cutoff = "roc", cutoff.show = list(show =
   "Risk Group", fB.title = "Status", fC.title = "Expression"),
   size = list(ylab = 14, fAB.points = 2, fAB.vline = 1, fAB.legendtitle =
   12, fAB.legendtext = 10), height.ratio = c(0.1, 0.1, 0.01, 0.15),
-  family = "serif")
+  family = "serif", vjust = c(A = 1, B = 2))
 }
 \arguments{
 \item{data}{dataframe data}
@@ -34,6 +34,8 @@ and legend text in figure A and B}
 \item{height.ratio}{relative height}
 
 \item{family}{family}
+
+\item{vjust}{vertical just for figure A and figure B}
 }
 \value{
 a ggplot picture

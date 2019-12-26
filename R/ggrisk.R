@@ -12,6 +12,7 @@
 #'     and legend text in figure A and B
 #' @param height.ratio relative height
 #' @param family family
+#' @param vjust vertical just for figure A and figure B
 #' @importFrom ggplot2 aes aes_string geom_point geom_vline theme element_blank element_text scale_colour_hue
 #' @importFrom ggplot2 ylab geom_tile unit scale_fill_gradient2 scale_x_continuous geom_raster theme_classic annotate
 #' @importFrom stats as.formula median sd
@@ -50,7 +51,8 @@ ggrisk <- function(data,time,event,
                              fAB.legendtitle=12,
                              fAB.legendtext=10),
                    height.ratio=c(0.1,0.1,0.01,0.15),
-                   family='serif') {
+                   family='serif',
+                   vjust=c(A=1,B=2)) {
     color=list(fAB=c(low='#00bfc4', high='#f8766d'),
                fC=c(low='#00bfc4', mid='white',high='#f8766d'))
     ylab.angle=c(AB=90,C=0)
@@ -132,13 +134,14 @@ ggrisk <- function(data,time,event,
             axis.title.y = element_text(size = size$ylab),
             legend.title = element_text(size = size$fAB.legendtitle),
             legend.text = element_text(size = size$fAB.legendtext)
-        ) +
+        ) + coord_trans()+
         scale_colour_hue(legend$fA,
                          labels = lab.A) +
         ylab(lab$fA.ylab)+
         theme(axis.title.y = element_text(
             angle = ylab.angle['AB'],
-            family=family)
+            family=family,
+            vjust = vjust[1])
         )+
         scale_x_continuous(expand = c(0,0.4))
     if (cutoff.show$show){
@@ -161,6 +164,8 @@ ggrisk <- function(data,time,event,
         fB.cor = ifelse(data4[, event] == 1, color$fAB[2], color$fAB[1])
         lab.B = c('Alive', 'Dead')
     }
+    forB=fA$theme$axis.title.y
+    forB$vjust=vjust[2]
     fB=ggplot2::ggplot(data = data4,
                        aes(x = 1:nrow(data4), y = data4[, time])) +
         geom_point(aes(color = fB.cor,
@@ -184,7 +189,7 @@ ggrisk <- function(data,time,event,
         ) +
         scale_colour_hue(legend$fB, labels = lab.B) +
         ylab(lab$fB.ylab)+
-        theme(axis.title.y = fA$theme$axis.title.y)+
+        theme(axis.title.y = forB)+coord_trans()+
         scale_x_continuous(expand = c(0,0.4))
     # middle
     middle = ggplot2::ggplot(data4, aes(
@@ -219,6 +224,7 @@ ggrisk <- function(data,time,event,
     fA.title.style=fA$theme$axis.title.y
     fA.title.style$family=family
     fA.title.style$angle=ylab.angle['C']
+    fA.title.style$vjust=NULL
     fC = ggplot2::ggplot(data7, aes_string(x = 'id', y = 'variable',
                                            fill = 'value')) +
         geom_raster() +
