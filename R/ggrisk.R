@@ -13,7 +13,7 @@
 #' @param height.ratio relative height
 #' @param family family
 #' @param vjust vertical just for figure A and figure B
-#' @importFrom ggplot2 aes aes_string geom_point geom_vline theme element_blank element_text scale_colour_hue
+#' @importFrom ggplot2 aes aes_string geom_point geom_vline theme element_blank element_text scale_colour_hue coord_trans
 #' @importFrom ggplot2 ylab geom_tile unit scale_fill_gradient2 scale_x_continuous geom_raster theme_classic annotate
 #' @importFrom stats as.formula median sd
 #' @return a ggplot picture
