@@ -11,7 +11,7 @@
 #' @param height.ratio relative height
 #' @param family family
 #' @importFrom ggplot2 aes aes_string geom_point geom_vline theme element_blank element_text scale_colour_hue
-#' @importFrom ggplot2 ylab geom_tile unit scale_fill_gradient2
+#' @importFrom ggplot2 ylab geom_tile unit scale_fill_gradient2 scale_x_continuous geom_raster theme_classic
 #' @importFrom stats as.formula median sd
 #' @return a ggplot picture
 #' @export
@@ -95,6 +95,8 @@ ggrisk <- function(data,time,event,
     if (length(cut.position)>1){
         cut.position=cut.position[length(cut.position)]
     }
+    data4$riskscore=round(data4$riskscore,1)
+    data4[, time]=round(data4[, time],1)
     #figure A risk plot
     fA = ggplot2::ggplot(data = data4, aes(x = 1:nrow(data4),
                                   y = data4$riskscore)) +
@@ -104,26 +106,27 @@ ggrisk <- function(data,time,event,
         geom_vline(
             xintercept = cut.position,
             linetype = 'dotted',
-            size = size$fAB.vline,
-        ) +
+            size = size$fAB.vline
+        ) + theme_classic() +
         theme(
             panel.grid = element_blank(),
             panel.background = element_blank(),
-            axis.line = element_blank(),
-            axis.ticks = element_blank(),
-            axis.text = element_blank(),
+            axis.ticks.x = element_blank(),
+            axis.line.x = element_blank(),
+            axis.text.x = element_blank(),
             axis.title.x = element_blank(),
             axis.title.y = element_text(size = size$ylab),
             legend.title = element_text(size = size$fAB.legendtitle),
             legend.text = element_text(size = size$fAB.legendtext)
-        ) +
+        ) + 
         scale_colour_hue(legend$fA,
                          labels = lab.A) +
         ylab(lab$fA.ylab)+
         theme(axis.title.y = element_text(
             angle = ylab.angle['AB'],
-            family=family),
-              )
+            family=family)
+              )+
+      scale_x_continuous(expand = c(0,0.3))
     #fB
     if (cutoff::judge_123(order(color$fAB))) {
         fB.cor = ifelse(data4[, event] == 1, color$fAB[1], color$fAB[2])
@@ -140,14 +143,14 @@ ggrisk <- function(data,time,event,
         geom_vline(
             xintercept = cut.position,
             linetype = 'dotted',
-            size = size$fAB.vline,
-        ) +
+            size = size$fAB.vline
+        ) +theme_classic() +
         theme(
             panel.grid = element_blank(),
             panel.background = element_blank(),
-            axis.line = element_blank(),
-            axis.ticks = element_blank(),
-            axis.text = element_blank(),
+            axis.ticks.x = element_blank(),
+            axis.line.x = element_blank(),
+            axis.text.x = element_blank(),
             axis.title.x = element_blank(),
             axis.title.y = element_text(size = size$ylab),
             legend.title = element_text(size = size$fAB.legendtitle),
@@ -155,7 +158,8 @@ ggrisk <- function(data,time,event,
         ) +
         scale_colour_hue(legend$fB, labels = lab.B) +
         ylab(lab$fB.ylab)+
-        theme(axis.title.y = fA$theme$axis.title.y)
+        theme(axis.title.y = fA$theme$axis.title.y)+
+      scale_x_continuous(expand = c(0,0.3))
     # middle
     middle = ggplot2::ggplot(data4, aes(
         x = 1:nrow(data4),
@@ -173,7 +177,8 @@ ggrisk <- function(data,time,event,
             legend.title = element_text(size = size$fAB.legendtitle),
             legend.text = element_text(size = size$fAB.legendtext),
             plot.margin = unit(c(0.15,0,-0.3,0), "cm")
-        )
+        )+
+      scale_x_continuous(expand = c(0,0.3))
 
     #fC
     data5 = data4[, set::not(colnames(data4), c(time, event,
@@ -190,7 +195,7 @@ ggrisk <- function(data,time,event,
     fA.title.style$angle=ylab.angle['C']
     fC = ggplot2::ggplot(data7, aes_string(x = 'id', y = 'variable',
                            fill = 'value')) +
-        geom_tile() +
+        geom_raster() +
         theme(
             panel.grid = element_blank(),
             panel.background = element_blank(),
@@ -199,7 +204,8 @@ ggrisk <- function(data,time,event,
             axis.text.x = element_blank(),
             axis.title = element_blank(),
             legend.title = element_text(size = size$fAB.legendtitle),
-            legend.text = element_text(size = size$fAB.legendtext)
+            legend.text = element_text(size = size$fAB.legendtext),
+            plot.background = element_blank() #the key to avoide legend overlap
         ) +
         scale_fill_gradient2(
             name = legend$fC.title,
@@ -207,15 +213,16 @@ ggrisk <- function(data,time,event,
             mid = color$fC[2],
             high = color$fC[3]
         ) + theme(
-            axis.text = fA.title.style)
+            axis.text = fA.title.style)+
+      scale_x_continuous(expand = c(0,0.3))
     fC
-    egg::ggarrange(
-        fA,
-        fB,
-        middle,
-        fC,
-        ncol = 1,
-        labels = c('A', 'B', '', 'C'),
-        heights = height.ratio
+   egg::ggarrange(
+      fA,
+      fB,
+      middle,
+      fC,
+      ncol = 1,
+      labels = c('A', 'B', 'C', ''),
+      heights = height.ratio
     )
 }
