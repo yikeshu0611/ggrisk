@@ -1,20 +1,28 @@
 #' Risk Plot for Cox Regression
 #' @description A ggplot style risk plot for cox regression.
+#'
 #' @param data dataframe data
 #' @param time variable name for following time
 #' @param event variable name for event time
 #' @param cutoff a number or string, which can be roc, median or cutoff
 #' @param cutoff.show a list contains a logical argument show, default is TRUE,
 #'     x and y coordinates, label and size.
-#' @param lab ylab for figure A and B
-#' @param legend legend title for figure A, B and C
 #' @param size size for y-axis labels, points, vertical line, legend title,
 #'     and legend text in figure A and B
 #' @param height.ratio relative height
 #' @param family family
+#' @param code0 string, code as 0 in event, default is Alive
+#' @param code1 string, code as 1 in event, default is Dead
+#' @param code.highrisk string, code as high risk group in risk score, default is high
+#' @param code.lowrisk string, code as high low group in risk score, default is low
+#' @param ylab.title a string vector of label titles for figure A, B and C
+#' @param legend.title a string vector of legend titles for figure A, B and C
+#' @param color a list of three string vectors of colors for figure A, B and C
 #' @param ylab.vjust vertical just for figure A and figure B
+#'
 #' @importFrom ggplot2 aes aes_string geom_point geom_vline theme element_blank element_text scale_colour_hue coord_trans
 #' @importFrom ggplot2 ylab geom_tile unit scale_fill_gradient2 scale_x_continuous geom_raster theme_classic annotate
+#' @importFrom ggplot2 scale_color_manual element_line scale_fill_manual ggplot scale_fill_manual
 #' @importFrom stats as.formula median sd
 #' @return a ggplot picture
 #' @export
@@ -116,7 +124,7 @@ ggrisk <- function(data,time,event,
     #rearange colorA
     color$A=c(color$A['low'],color$A['high'])
     names(color$A)=c(code.lowrisk,code.highrisk)
-    fA = ggplot2::ggplot(data = data4,
+    fA = ggplot(data = data4,
                          aes_string(
                              x = 1:nrow(data4),
                              y = data4$riskscore,
@@ -174,7 +182,7 @@ ggrisk <- function(data,time,event,
     forB$vjust=ylab.vjust['B']
     color$B=c(color$B['code0'],color$B['code1'])
     names(color$B)=c(code0,code1)
-    fB=ggplot2::ggplot(data = data4,
+    fB=ggplot(data = data4,
                        aes_string(
                            x = 1:nrow(data4),
                            y = data4[, time],
@@ -208,7 +216,7 @@ ggrisk <- function(data,time,event,
         scale_x_continuous(expand = c(0,0.4))
     fB
     # middle
-    middle = ggplot2::ggplot(data4, aes(
+    middle = ggplot(data4, aes(
         x = 1:nrow(data4),
         y = 1)
         ) +
@@ -241,7 +249,7 @@ ggrisk <- function(data,time,event,
     A.style$family=family
     A.style$angle=0
     A.style$vjust=NULL
-    fC = ggplot2::ggplot(data7, aes_string(x = 'id',
+    fC = ggplot(data7, aes_string(x = 'id',
                                            y = 'variable',
                                            fill = 'value')) +
         geom_raster() +
