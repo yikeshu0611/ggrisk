@@ -4,13 +4,17 @@
 \alias{ggrisk}
 \title{Risk Plot for Cox Regression}
 \usage{
-ggrisk(data, time, event, cutoff = "roc", cutoff.show = list(show =
-  TRUE, x = NULL, y = NULL, label = NULL, size = 5), lab = list(fA.ylab =
-  "Risk Score", fB.ylab = "Survival Time"), legend = list(fA.title =
-  "Risk Group", fB.title = "Status", fC.title = "Expression"),
-  size = list(ylab = 14, fAB.points = 2, fAB.vline = 1, fAB.legendtitle =
-  12, fAB.legendtext = 10), height.ratio = c(0.1, 0.1, 0.01, 0.15),
-  family = "serif", vjust = c(A = 1, B = 2))
+ggrisk(data, time, event, code0 = "Alive", code1 = "Dead",
+  code.highrisk = "high", code.lowrisk = "low", cutoff = "roc",
+  ylab.title = c(A = "Risk Score", B = "Survival Time"),
+  ylab.vjust = c(A = 3.6, B = 1), cutoff.show = list(show = TRUE, x =
+  NULL, y = NULL, label = NULL), legend.title = c(A = "Risk Group", B =
+  "Status", C = "Expression"), size = list(ABC = 1.5, ylab.title = 14,
+  ytext = 11, yticks = 0.5, AB.points = 2, dashline = 1, cutoff = 5,
+  legendtitle = 13, legendtext = 12), color = list(A = c(low = "#00bfc4",
+  high = "#f8766d"), B = c(code0 = "#00bfc4", code1 = "#f8766d"), C = c(low
+  = "#00bfc4", median = "white", high = "#f8766d")),
+  height.ratio = c(0.1, 0.1, 0.01, 0.15), family = "serif")
 }
 \arguments{
 \item{data}{dataframe data}
@@ -19,23 +23,33 @@ ggrisk(data, time, event, cutoff = "roc", cutoff.show = list(show =
 
 \item{event}{variable name for event time}
 
+\item{code0}{string, code as 0 in event, default is Alive}
+
+\item{code1}{string, code as 1 in event, default is Dead}
+
+\item{code.highrisk}{string, code as high risk group in risk score, default is high}
+
+\item{code.lowrisk}{string, code as high low group in risk score, default is low}
+
 \item{cutoff}{a number or string, which can be roc, median or cutoff}
+
+\item{ylab.title}{a string vector of label titles for figure A, B and C}
+
+\item{ylab.vjust}{vertical just for figure A and figure B}
 
 \item{cutoff.show}{a list contains a logical argument show, default is TRUE,
 x and y coordinates, label and size.}
 
-\item{lab}{ylab for figure A and B}
-
-\item{legend}{legend title for figure A, B and C}
+\item{legend.title}{a string vector of legend titles for figure A, B and C}
 
 \item{size}{size for y-axis labels, points, vertical line, legend title,
 and legend text in figure A and B}
 
+\item{color}{a list of three string vectors of colors for figure A, B and C}
+
 \item{height.ratio}{relative height}
 
 \item{family}{family}
-
-\item{vjust}{vertical just for figure A and figure B}
 }
 \value{
 a ggplot picture

@@ -25,6 +25,7 @@ Imports:
     do,
     set,
     cutoff,
-    fastStat
+    fastStat,
+    grid
 URL: https://github.com/yikeshu0611/ggrisk
 BugReports: https://github.com/yikeshu0611/ggrisk/issues
