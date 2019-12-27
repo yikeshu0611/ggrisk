@@ -12,7 +12,7 @@
 #'     and legend text in figure A and B
 #' @param height.ratio relative height
 #' @param family family
-#' @param vjust vertical just for figure A and figure B
+#' @param ylab.vjust vertical just for figure A and figure B
 #' @importFrom ggplot2 aes aes_string geom_point geom_vline theme element_blank element_text scale_colour_hue coord_trans
 #' @importFrom ggplot2 ylab geom_tile unit scale_fill_gradient2 scale_x_continuous geom_raster theme_classic annotate
 #' @importFrom stats as.formula median sd
@@ -33,29 +33,33 @@
 #'     cutoff.show=list(show=FALSE)
 #'     )
 ggrisk <- function(data,time,event,
-                   cutoff='roc',
-                   cutoff.show=list(show=TRUE,
-                     x=NULL,
-                     y=NULL,
-                     label=NULL,
-                     size=5
-                     ),
-                   lab=list(fA.ylab='Risk Score',
-                            fB.ylab='Survival Time'),
-                   legend=list(fA.title='Risk Group',
-                               fB.title='Status',
-                               fC.title='Expression'),
-                   size=list(ylab=14,
-                             fAB.points=2,
-                             fAB.vline=1,
-                             fAB.legendtitle=12,
-                             fAB.legendtext=10),
-                   height.ratio=c(0.1,0.1,0.01,0.15),
-                   family='serif',
-                   vjust=c(A=1,B=2)) {
-    color=list(fAB=c(low='#00bfc4', high='#f8766d'),
-               fC=c(low='#00bfc4', mid='white',high='#f8766d'))
-    ylab.angle=c(AB=90,C=0)
+                    code0='Alive',
+                    code1='Dead',
+                    code.highrisk='high',
+                    code.lowrisk='low',
+                    cutoff='roc',
+                    ylab.title=c(A='Risk Score',B='Survival Time'),
+                    ylab.vjust=c(A=3.6,B=1),
+
+                    cutoff.show=list(show=TRUE,
+                                     x=NULL,
+                                     y=NULL,
+                                     label=NULL),
+                    legend.title=c(A='Risk Group',B='Status',C='Expression'),
+                    size=list(ABC=1.5,
+                              ylab.title=14,
+                              ytext=1,
+                              yticks=1,
+                              AB.points=2,
+                              dashline=1,
+                              cutoff=5,
+                              legendtitle=13,
+                              legendtext=12),
+                    color=list(A=c(low='#00bfc4',high='#f8766d'),
+                               B=c(code0='#00bfc4',code1='#f8766d'),
+                               C=c(low='#00bfc4',median='white',high='#f8766d')),
+                    height.ratio=c(0.1,0.1,0.01,0.15),
+                    family='serif') {
     #  1.regression
     x = do::inner_Add_Symbol(set::not(colnames(data), c(time, event)))
     formu = paste0('survival::Surv(', time, ',', event, ')~', x)
@@ -95,55 +99,63 @@ ggrisk <- function(data,time,event,
     type = cutoff::roc(score = data3$riskscore,
                        class = data3[,event])$type
     if (type == 'positive classification') {
-        `Risk Group` = ifelse(data3$riskscore > cutoff.point, 'high', 'low')
-        fAB.color = ifelse(data3$riskscore > cutoff.point, color$fAB[1], color$fAB[2])
-        lab.A = c('high', 'low')
+        `Risk Group` = ifelse(data3$riskscore > cutoff.point,code.highrisk,code.lowrisk)
     } else{
-        `Risk Group` = ifelse(data3$riskscore < cutoff.point, 'high', 'low')
-        fAB.color = ifelse(data3$riskscore < cutoff.point, color$fAB[1], color$fAB[2])
-        lab.A = c('high', 'low')
+        `Risk Group` = ifelse(data3$riskscore < cutoff.point,code.highrisk,code.lowrisk)
     }
     data4 = cbind(data3, `Risk Group`)
     cut.position=(1:nrow(data4))[data4$riskscore == cutoff.point]
-    if (!length(cut.position)){
+    if (length(cut.position)==1){
         cut.position=which.min(abs(data4$riskscore - cutoff.point))
-    }
-    if (length(cut.position)>1){
+    }else if (length(cut.position)>1){
         cut.position=cut.position[length(cut.position)]
     }
     data4$riskscore=round(data4$riskscore,1)
     data4[, time]=round(data4[, time],1)
     #figure A risk plot
-    fA = ggplot2::ggplot(data = data4, aes(x = 1:nrow(data4),
-                                           y = data4$riskscore)) +
-        geom_point(aes(colour = fAB.color,
-                       group = `Risk Group`),
-                   size = size$fAB.points) +
+    #rearange colorA
+    color$A=c(color$A['low'],color$A['high'])
+    names(color$A)=c(code.lowrisk,code.highrisk)
+    fA = ggplot2::ggplot(data = data4,
+                         aes_string(
+                             x = 1:nrow(data4),
+                             y = data4$riskscore,
+                             color=factor(`Risk Group`)
+                             )
+                         ) +
+        geom_point(size = size$AB.points) +
+        scale_color_manual(name=legend.title['A'],values = color$A) +
         geom_vline(
             xintercept = cut.position,
             linetype = 'dotted',
-            size = size$fAB.vline
-        ) + theme_classic() +
+            size = size$dashline
+        ) +
         theme(
             panel.grid = element_blank(),
             panel.background = element_blank(),
             axis.ticks.x = element_blank(),
             axis.line.x = element_blank(),
             axis.text.x = element_blank(),
+            axis.text.y=element_text(family = family,size=15),
             axis.title.x = element_blank(),
-            axis.title.y = element_text(size = size$ylab),
-            legend.title = element_text(size = size$fAB.legendtitle),
-            legend.text = element_text(size = size$fAB.legendtext)
-        ) + coord_trans()+
-        scale_colour_hue(legend$fA,
-                         labels = lab.A) +
-        ylab(lab$fA.ylab)+
+            axis.title.y = element_text(size = size$ylab.title)
+        ) +
+        theme(axis.line.y = element_line(colour = "black",size=size$yline),
+              axis.text.y = element_text(size=size$ytext),
+              axis.ticks.y = element_line(size = size$yticks))+
+        theme(legend.title = element_text(size = size$legendtitle,
+                                          family = family),
+              legend.text = element_text(size=size$legendtext,
+                                         family = family))+
+        coord_trans()+
+        ylab(ylab.title['A'])+
         theme(axis.title.y = element_text(
-            angle = ylab.angle['AB'],
+            angle = 90,
             family=family,
-            vjust = vjust[1])
+            vjust = ylab.vjust['A'])
         )+
         scale_x_continuous(expand = c(0,0.4))
+    fA
     if (cutoff.show$show){
         fA=fA+ annotate("text",
                     x=ifelse(is.null(cutoff.show$x),
@@ -154,28 +166,27 @@ ggrisk <- function(data,time,event,
                     family=family,
                     fontface="plain",
                     colour="black",
-                    size=cutoff.show$size)
+                    size=size$cutoff)
     }
     #fB
-    if (cutoff::judge_123(order(color$fAB))) {
-        fB.cor = ifelse(data4[, event] == 1, color$fAB[1], color$fAB[2])
-        lab.B = c('Dead', 'Alive')
-    } else{
-        fB.cor = ifelse(data4[, event] == 1, color$fAB[2], color$fAB[1])
-        lab.B = c('Alive', 'Dead')
-    }
+    #forB is the y lab style
     forB=fA$theme$axis.title.y
-    forB$vjust=vjust[2]
+    forB$vjust=ylab.vjust['B']
+    color$B=c(color$B['code0'],color$B['code1'])
+    names(color$B)=c(code0,code1)
     fB=ggplot2::ggplot(data = data4,
-                       aes(x = 1:nrow(data4), y = data4[, time])) +
-        geom_point(aes(color = fB.cor,
-                       group = data4[, event]),
-                   size = size$fAB.points) +
+                       aes_string(
+                           x = 1:nrow(data4),
+                           y = data4[, time],
+                           color=factor(ifelse(data4[,event]==1,code1,code0)))
+                       ) +
+        geom_point(size=size$AB.points)+
+        scale_color_manual(name=legend.title['B'],values = color$B) +
         geom_vline(
             xintercept = cut.position,
             linetype = 'dotted',
-            size = size$fAB.vline
-        ) +theme_classic() +
+            size = size$dashline
+        )  +
         theme(
             panel.grid = element_blank(),
             panel.background = element_blank(),
@@ -183,21 +194,26 @@ ggrisk <- function(data,time,event,
             axis.line.x = element_blank(),
             axis.text.x = element_blank(),
             axis.title.x = element_blank(),
-            axis.title.y = element_text(size = size$ylab),
-            legend.title = element_text(size = size$fAB.legendtitle),
-            legend.text = element_text(size = size$fAB.legendtext)
+            axis.text.y=element_text(family = family,size=15),
+            axis.title.y = element_text(size = size$ylab.title)
         ) +
-        scale_colour_hue(legend$fB, labels = lab.B) +
-        ylab(lab$fB.ylab)+
-        theme(axis.title.y = forB)+coord_trans()+
+        theme(axis.line.y = element_line(colour = "black",size=size$yline),
+              axis.text.y = element_text(size=size$ytext),
+              axis.ticks.y = element_line(size = size$yticks))+
+        theme(legend.title = element_text(size = size$legendtitle,family = family),
+              legend.text = element_text(size=size$legendtext,family = family))+
+        ylab(ylab.title['B'])+
+        theme(axis.title.y = forB)+
+        coord_trans()+
         scale_x_continuous(expand = c(0,0.4))
+    fB
     # middle
     middle = ggplot2::ggplot(data4, aes(
         x = 1:nrow(data4),
-        y = 1,
-        fill = `Risk Group`
-    )) +
-        geom_tile() +
+        y = 1)
+        ) +
+        geom_tile(aes(fill = data4$`Risk Group`))+
+        scale_fill_manual(name=legend.title['A'],values = color$A)+
         theme(
             panel.grid = element_blank(),
             panel.background = element_blank(),
@@ -205,12 +221,12 @@ ggrisk <- function(data,time,event,
             axis.ticks = element_blank(),
             axis.text = element_blank(),
             axis.title = element_blank(),
-            legend.title = element_text(size = size$fAB.legendtitle),
-            legend.text = element_text(size = size$fAB.legendtext),
             plot.margin = unit(c(0.15,0,-0.3,0), "cm")
         )+
+        theme(legend.title = element_text(size = size$legendtitle,family = family),
+              legend.text = element_text(size=size$legendtext,family = family))+
         scale_x_continuous(expand = c(0,0.4))
-
+    middle
     #fC
     data5 = data4[, set::not(colnames(data4), c(time, event,
                                                 'Risk Group',
@@ -221,11 +237,12 @@ ggrisk <- function(data,time,event,
     data6 = cbind(id = 1:nrow(data5), data5)
     data7 = do::reshape_toLong(data = data6,
                                var.names = colnames(data5))
-    fA.title.style=fA$theme$axis.title.y
-    fA.title.style$family=family
-    fA.title.style$angle=ylab.angle['C']
-    fA.title.style$vjust=NULL
-    fC = ggplot2::ggplot(data7, aes_string(x = 'id', y = 'variable',
+    A.style=fA$theme$axis.title.y
+    A.style$family=family
+    A.style$angle=0
+    A.style$vjust=NULL
+    fC = ggplot2::ggplot(data7, aes_string(x = 'id',
+                                           y = 'variable',
                                            fill = 'value')) +
         geom_raster() +
         theme(
@@ -235,17 +252,17 @@ ggrisk <- function(data,time,event,
             axis.ticks = element_blank(),
             axis.text.x = element_blank(),
             axis.title = element_blank(),
-            legend.title = element_text(size = size$fAB.legendtitle),
-            legend.text = element_text(size = size$fAB.legendtext),
             plot.background = element_blank() #the key to avoide legend overlap
         ) +
         scale_fill_gradient2(
-            name = legend$fC.title,
-            low = color$fC[1],
-            mid = color$fC[2],
-            high = color$fC[3]
-        ) + theme(
-            axis.text = fA.title.style)+
+            name = legend.title['C'],
+            low = color$C[1],
+            mid = color$C[2],
+            high = color$C[3]
+        ) +
+        theme(axis.text = A.style)+
+        theme(legend.title = element_text(size = size$legendtitle,family = family),
+              legend.text = element_text(size=size$legendtext,family = family))+
         scale_x_continuous(expand = c(0,0.4))
     fC
     egg::ggarrange(
@@ -255,6 +272,8 @@ ggrisk <- function(data,time,event,
         fC,
         ncol = 1,
         labels = c('A', 'B', 'C', ''),
+        label.args = list(gp = grid::gpar(font = 2, cex =size$ABC,
+                                          family=family)),
         heights = height.ratio
     )
 }
