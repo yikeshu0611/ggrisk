@@ -2,72 +2,284 @@
 % Please edit documentation in R/ggrisk.R
 \name{ggrisk}
 \alias{ggrisk}
-\title{Risk Plot for Cox Regression}
+\title{Riskscore Plot for Cox Regression}
 \usage{
-ggrisk(data, time, event, code0 = "Alive", code1 = "Dead",
-  code.highrisk = "high", code.lowrisk = "low", cutoff = "roc",
-  ylab.title = c(A = "Risk Score", B = "Survival Time"),
-  ylab.vjust = c(A = 3.6, B = 1), cutoff.show = list(show = TRUE, x =
-  NULL, y = NULL, label = NULL), legend.title = c(A = "Risk Group", B =
-  "Status", C = "Expression"), size = list(ABC = 1.5, ylab.title = 14,
-  ytext = 11, yticks = 0.5, AB.points = 2, dashline = 1, cutoff = 5,
-  legendtitle = 13, legendtext = 12), color = list(A = c(low = "#00bfc4",
-  high = "#f8766d"), B = c(code0 = "#00bfc4", code1 = "#f8766d"), C = c(low
-  = "#00bfc4", median = "white", high = "#f8766d")),
-  height.ratio = c(0.1, 0.1, 0.01, 0.15), family = "serif")
+ggrisk(data, time, event, heatmap.genes, code.0 = "Alive",
+  code.1 = "Dead", code.highrisk = "High", code.lowrisk = "Low",
+  cutoff.show = TRUE, cutoff.value = "median", cutoff.x, cutoff.y,
+  cutoff.label, title.A.ylab = "Risk Score",
+  title.B.ylab = "Survival Time", title.A.legend = "Risk Group",
+  title.B.legend = "Status", title.C.legend = "Expression",
+  size.ABC = 1.5, size.ylab.title = 14, size.Atext = 11,
+  size.Btext = 11, size.Ctext = 11, size.yticks = 0.5,
+  size.yline = 0.5, size.points = 2, size.dashline = 1,
+  size.cutoff = 5, size.legendtitle = 13, size.legendtext = 12,
+  color.A = c(low = "blue", high = "red"), color.B = c(code.0 = "blue",
+  code.1 = "red"), color.C = c(low = "blue", median = "white", high =
+  "red"), vjust.A.ylab = 1, vjust.B.ylab = 2, family = "sans",
+  expand.x = 3, relative_heights = c(0.1, 0.1, 0.01, 0.15))
 }
 \arguments{
 \item{data}{dataframe data}
 
-\item{time}{variable name for following time}
+\item{time}{numeric variable. Name for following time}
 
-\item{event}{variable name for event time}
+\item{event}{must be numeric variable. Name for event, which must be coded as 0 and 1}
 
-\item{code0}{string, code as 0 in event, default is Alive}
+\item{heatmap.genes}{(optional) numeric variables. Name for genes}
 
-\item{code1}{string, code as 1 in event, default is Dead}
+\item{code.0}{string. Code for event 0. Default is 'Alive'}
 
-\item{code.highrisk}{string, code as high risk group in risk score, default is high}
+\item{code.1}{string. Code for event 1. Default is 'Dead'}
 
-\item{code.lowrisk}{string, code as high low group in risk score, default is low}
+\item{code.highrisk}{string. Code for highrisk in risk score. Default is 'High'}
 
-\item{cutoff}{a number or string, which can be roc, median or cutoff}
+\item{code.lowrisk}{string. Code for lowrisk in risk score. Default is 'Low'}
 
-\item{ylab.title}{a string vector of label titles for figure A, B and C}
+\item{cutoff.show}{logical, whether to show text for cutoff in figure A. Default is TRUE}
 
-\item{ylab.vjust}{vertical just for figure A and figure B}
+\item{cutoff.value}{string, which can be 'median', 'roc' or 'cutoff'. Even you can define it by yourself}
 
-\item{cutoff.show}{a list contains a logical argument show, default is TRUE,
-x and y coordinates, label and size.}
+\item{cutoff.x}{numeric (optional), ordination x for cutoff text}
 
-\item{legend.title}{a string vector of legend titles for figure A, B and C}
+\item{cutoff.y}{numeric (optional), ordination y for cutoff text}
 
-\item{size}{size for y-axis labels, points, vertical line, legend title,
-and legend text in figure A and B}
+\item{cutoff.label}{(should be) string. Define cutoff label by yourself}
 
-\item{color}{a list of three string vectors of colors for figure A, B and C}
+\item{title.A.ylab}{string, y-lab title for figure A. Default is 'Riskscore'}
 
-\item{height.ratio}{relative height}
+\item{title.B.ylab}{string, y-lab title for figure B. Default is 'Survival Time'}
 
-\item{family}{family}
+\item{title.A.legend}{string, legend title for figure A. Default is 'Risk Group'}
+
+\item{title.B.legend}{string, legend title for figure B. Default is 'Status'}
+
+\item{title.C.legend}{string, legend title for figure C. Default is 'Expression'}
+
+\item{size.ABC}{numeric, size for ABC. Default is 1.5}
+
+\item{size.ylab.title}{numeric, size for y-axis label title. Default is 14}
+
+\item{size.Atext}{numeric, size for y-axis text in figure A. Default is 11}
+
+\item{size.Btext}{numeric, size for y-axis text in figure B. Default is 11}
+
+\item{size.Ctext}{numeric, size for y-axis text in figure C. Default is 11}
+
+\item{size.yticks}{numeric, size for y-axis ticks. Default is 0.5}
+
+\item{size.yline}{numeric, size for y-axis line. Default is 0.5}
+
+\item{size.points}{numeric, size for scatter points. Default is 2}
+
+\item{size.dashline}{numeric, size for dashline. Default is 1}
+
+\item{size.cutoff}{numeric, size for cutoff text. Default is 5}
+
+\item{size.legendtitle}{numeric, size for legend title. Default is 13}
+
+\item{size.legendtext}{numeric, size for legend text. Default is 12}
+
+\item{color.A}{color for figure A. Default is low = 'blue', high = 'red'}
+
+\item{color.B}{color for figure B. Default is code.0 = 'blue', code.1 = 'red'}
+
+\item{color.C}{color for figure C. Default is low = 'blue', median = 'white', high = 'red'}
+
+\item{vjust.A.ylab}{numeric, vertical just for y-label in figure A. Default is 1}
+
+\item{vjust.B.ylab}{numeric, vertical just for y-label in figure B. Default is 2}
+
+\item{family}{family, default is sans}
+
+\item{expand.x}{numeric, expand for x-axis}
+
+\item{relative_heights}{numeric, relative heights for figure A, B, colored side bar and heatmap. Default is 0.1 0.1 0.01 and 0.15}
 }
 \value{
-a ggplot picture
+A riskscore picture
 }
 \description{
-A ggplot style risk plot for cox regression.
+Riskscore Plot for Cox Regression
 }
 \examples{
-library(ggrisk)
-ggrisk(
-    data=mtcars,
-    time='qsec',
-    event='am'
-    )
-ggrisk(
-    data=mtcars,
-    time='qsec',
-    event='am',
-    cutoff.show=list(show=FALSE)
-    )
+#plot
+ggrisk(data=LIRI,time='time',event='status')
+
+#heatmap.genes
+ggrisk(data=LIRI,time='time',event='status',
+       heatmap.genes=c('GPR182','CENPA','BCO2'))
+
+#cutoff
+ggrisk(data=LIRI,time='time',event='status',
+       cutoff.value='median') #default
+ggrisk(data=LIRI,time='time',event='status',
+       cutoff.value='roc')
+ggrisk(data=LIRI,time='time',event='status',
+       cutoff.value='cutoff')
+ggrisk(data=LIRI,time='time',event='status',
+       cutoff.value=-1)
+ggrisk(data=LIRI,time='time',event='status',
+       cutoff.value='median',
+       cutoff.x = 145,
+       cutoff.y = -0.8)
+ggrisk(data=LIRI,time='time',event='status',
+       cutoff.value='median',
+       cutoff.x = 145,
+       cutoff.y = -0.8,
+       cutoff.label='This is cutoff')
+
+#code for 0 and 1
+ggrisk(data=LIRI,time='time',event='status',
+       cutoff.value='median',
+       cutoff.x = 145,
+       cutoff.y = -0.8,
+       code.0 = 'Still Alive',
+       code.1 = 'Already Dead')
+
+#code for high and low risk group
+ggrisk(data=LIRI,time='time',event='status',
+       cutoff.value='median',
+       cutoff.x = 145,
+       cutoff.y = -0.8,
+       code.0 = 'Still Alive',
+       code.1 = 'Already Dead',
+       code.highrisk = 'High Risk',
+       code.lowrisk = 'Low Risk')
+#title
+ggrisk(data=LIRI,time='time',event='status',
+       cutoff.value='median',
+       cutoff.x = 145,
+       cutoff.y = -0.8,
+       code.0 = 'Still Alive',
+       code.1 = 'Already Dead',
+       code.highrisk = 'High Risk',
+       code.lowrisk = 'Low Risk',
+       title.A.ylab='Risk Score',
+       title.B.ylab='Survival Time(year)',
+       title.A.legend='Risk Group',
+       title.B.legend='Status',
+       title.C.legend='Expression')
+#size
+ggrisk(data=LIRI,time='time',event='status',
+       cutoff.value='median',
+       cutoff.x = 145,
+       cutoff.y = -0.8,
+       code.0 = 'Still Alive',
+       code.1 = 'Already Dead',
+       code.highrisk = 'High Risk',
+       code.lowrisk = 'Low Risk',
+       title.A.ylab='Risk Score',
+       title.B.ylab='Survival Time(year)',
+       title.A.legend='Risk Group',
+       title.B.legend='Status',
+       title.C.legend='Expression',
+       size.ABC=1.5,
+       size.ylab.title=14,
+       size.Atext=11,
+       size.Btext=11,
+       size.Ctext=11,
+       size.yticks=0.5,
+       size.yline=0.5,
+       size.points=2,
+       size.dashline=1,
+       size.cutoff=5,
+       size.legendtitle=13,
+       size.legendtext=12)
+#color
+ggrisk(data=LIRI,time='time',event='status',
+       cutoff.value='median',
+       cutoff.x = 145,
+       cutoff.y = -0.8,
+       code.0 = 'Still Alive',
+       code.1 = 'Already Dead',
+       code.highrisk = 'High Risk',
+       code.lowrisk = 'Low Risk',
+       title.A.ylab='Risk Score',
+       title.B.ylab='Survival Time(year)',
+       title.A.legend='Risk Group',
+       title.B.legend='Status',
+       title.C.legend='Expression',
+       size.ABC=1.5,
+       size.ylab.title=14,
+       size.Atext=11,
+       size.Btext=11,
+       size.Ctext=11,
+       size.yticks=0.5,
+       size.yline=0.5,
+       size.points=2,
+       size.dashline=1,
+       size.cutoff=5,
+       size.legendtitle=13,
+       size.legendtext=12,
+       color.A=c(low='blue',high='red'),
+       color.B=c(code.0='blue',code.1='red'),
+       color.C=c(low='blue',median='white',high='red'))
+
+#vjust
+ggrisk(data=LIRI,time='time',event='status',
+       cutoff.value='median',
+       cutoff.x = 145,
+       cutoff.y = -0.8,
+       code.0 = 'Still Alive',
+       code.1 = 'Already Dead',
+       code.highrisk = 'High Risk',
+       code.lowrisk = 'Low Risk',
+       title.A.ylab='Risk Score',
+       title.B.ylab='Survival Time(year)',
+       title.A.legend='Risk Group',
+       title.B.legend='Status',
+       title.C.legend='Expression',
+       size.ABC=1.5,
+       size.ylab.title=14,
+       size.Atext=11,
+       size.Btext=11,
+       size.Ctext=11,
+       size.yticks=0.5,
+       size.yline=0.5,
+       size.points=2,
+       size.dashline=1,
+       size.cutoff=5,
+       size.legendtitle=13,
+       size.legendtext=12,
+       color.A=c(low='blue',high='red'),
+       color.B=c(code.0='blue',code.1='red'),
+       color.C=c(low='blue',median='white',high='red'),
+       vjust.A.ylab=1,
+       vjust.B.ylab=2)
+
+#family, expand, relative height
+ggrisk(data=LIRI,time='time',event='status',
+       cutoff.value='median',
+       cutoff.x = 145,
+       cutoff.y = -0.8,
+       code.0 = 'Still Alive',
+       code.1 = 'Already Dead',
+       code.highrisk = 'High Risk',
+       code.lowrisk = 'Low Risk',
+       title.A.ylab='Risk Score',
+       title.B.ylab='Survival Time(year)',
+       title.A.legend='Risk Group',
+       title.B.legend='Status',
+       title.C.legend='Expression',
+       size.ABC=1.5,
+       size.ylab.title=14,
+       size.Atext=11,
+       size.Btext=11,
+       size.Ctext=11,
+       size.yticks=0.5,
+       size.yline=0.5,
+       size.points=2,
+       size.dashline=1,
+       size.cutoff=5,
+       size.legendtitle=13,
+       size.legendtext=12,
+       color.A=c(low='blue',high='red'),
+       color.B=c(code.0='blue',code.1='red'),
+       color.C=c(low='blue',median='white',high='red'),
+       vjust.A.ylab=1,
+       vjust.B.ylab=2,
+       family='sans',
+       expand.x=3,
+       relative_heights=c(0.1,0.1,0.01,0.15))
 }

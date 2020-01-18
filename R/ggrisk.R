@@ -1,73 +1,264 @@
-#' Risk Plot for Cox Regression
-#' @description A ggplot style risk plot for cox regression.
-#'
+#' @title Riskscore Plot for Cox Regression
 #' @param data dataframe data
-#' @param time variable name for following time
-#' @param event variable name for event time
-#' @param cutoff a number or string, which can be roc, median or cutoff
-#' @param cutoff.show a list contains a logical argument show, default is TRUE,
-#'     x and y coordinates, label and size.
-#' @param size size for y-axis labels, points, vertical line, legend title,
-#'     and legend text in figure A and B
-#' @param height.ratio relative height
-#' @param family family
-#' @param code0 string, code as 0 in event, default is Alive
-#' @param code1 string, code as 1 in event, default is Dead
-#' @param code.highrisk string, code as high risk group in risk score, default is high
-#' @param code.lowrisk string, code as high low group in risk score, default is low
-#' @param ylab.title a string vector of label titles for figure A, B and C
-#' @param legend.title a string vector of legend titles for figure A, B and C
-#' @param color a list of three string vectors of colors for figure A, B and C
-#' @param ylab.vjust vertical just for figure A and figure B
-#'
+#' @param time numeric variable. Name for following time
+#' @param event must be numeric variable. Name for event, which must be coded as 0 and 1
+#' @param heatmap.genes (optional) numeric variables. Name for genes
+#' @param code.0 string. Code for event 0. Default is 'Alive'
+#' @param code.1 string. Code for event 1. Default is 'Dead'
+#' @param code.highrisk string. Code for highrisk in risk score. Default is 'High'
+#' @param code.lowrisk string. Code for lowrisk in risk score. Default is 'Low'
+#' @param cutoff.show logical, whether to show text for cutoff in figure A. Default is TRUE
+#' @param cutoff.value string, which can be 'median', 'roc' or 'cutoff'. Even you can define it by yourself
+#' @param cutoff.x numeric (optional), ordination x for cutoff text
+#' @param cutoff.y numeric (optional), ordination y for cutoff text
+#' @param cutoff.label (should be) string. Define cutoff label by yourself
+#' @param title.A.ylab string, y-lab title for figure A. Default is 'Riskscore'
+#' @param title.B.ylab string, y-lab title for figure B. Default is 'Survival Time'
+#' @param title.A.legend string, legend title for figure A. Default is 'Risk Group'
+#' @param title.B.legend string, legend title for figure B. Default is 'Status'
+#' @param title.C.legend string, legend title for figure C. Default is 'Expression'
+#' @param size.ABC numeric, size for ABC. Default is 1.5
+#' @param size.ylab.title numeric, size for y-axis label title. Default is 14
+#' @param size.Atext numeric, size for y-axis text in figure A. Default is 11
+#' @param size.Btext numeric, size for y-axis text in figure B. Default is 11
+#' @param size.Ctext numeric, size for y-axis text in figure C. Default is 11
+#' @param size.yticks numeric, size for y-axis ticks. Default is 0.5
+#' @param size.yline numeric, size for y-axis line. Default is 0.5
+#' @param size.points numeric, size for scatter points. Default is 2
+#' @param size.dashline numeric, size for dashline. Default is 1
+#' @param size.cutoff numeric, size for cutoff text. Default is 5
+#' @param size.legendtitle numeric, size for legend title. Default is 13
+#' @param size.legendtext numeric, size for legend text. Default is 12
+#' @param color.A color for figure A. Default is low = 'blue', high = 'red'
+#' @param color.B color for figure B. Default is code.0 = 'blue', code.1 = 'red'
+#' @param color.C color for figure C. Default is low = 'blue', median = 'white', high = 'red'
+#' @param vjust.A.ylab numeric, vertical just for y-label in figure A. Default is 1
+#' @param vjust.B.ylab numeric, vertical just for y-label in figure B. Default is 2
+#' @param family family, default is sans
+#' @param expand.x  numeric, expand for x-axis
+#' @param relative_heights numeric, relative heights for figure A, B, colored side bar and heatmap. Default is 0.1 0.1 0.01 and 0.15
 #' @importFrom ggplot2 aes aes_string geom_point geom_vline theme element_blank element_text scale_colour_hue coord_trans
 #' @importFrom ggplot2 ylab geom_tile unit scale_fill_gradient2 scale_x_continuous geom_raster theme_classic annotate
 #' @importFrom ggplot2 scale_color_manual element_line scale_fill_manual ggplot scale_fill_manual
-#' @importFrom stats as.formula median sd
-#' @return a ggplot picture
+#' @importFrom stats as.formula median sd cor
+#' @return A riskscore picture
 #' @export
 #'
 #' @examples
-#' library(ggrisk)
-#' ggrisk(
-#'     data=mtcars,
-#'     time='qsec',
-#'     event='am'
-#'     )
-#' ggrisk(
-#'     data=mtcars,
-#'     time='qsec',
-#'     event='am',
-#'     cutoff.show=list(show=FALSE)
-#'     )
-ggrisk <- function(data,time,event,
-                    code0='Alive',
-                    code1='Dead',
-                    code.highrisk='high',
-                    code.lowrisk='low',
-                    cutoff='roc',
-                    ylab.title=c(A='Risk Score',B='Survival Time'),
-                    ylab.vjust=c(A=3.6,B=1),
-
-                    cutoff.show=list(show=TRUE,
-                                     x=NULL,
-                                     y=NULL,
-                                     label=NULL),
-                    legend.title=c(A='Risk Group',B='Status',C='Expression'),
-                    size=list(ABC=1.5,
-                              ylab.title=14,
-                              ytext=11,
-                              yticks=0.5,
-                              AB.points=2,
-                              dashline=1,
-                              cutoff=5,
-                              legendtitle=13,
-                              legendtext=12),
-                    color=list(A=c(low='#00bfc4',high='#f8766d'),
-                               B=c(code0='#00bfc4',code1='#f8766d'),
-                               C=c(low='#00bfc4',median='white',high='#f8766d')),
-                    height.ratio=c(0.1,0.1,0.01,0.15),
-                    family='serif') {
+#' #plot
+#' ggrisk(data=LIRI,time='time',event='status')
+#'
+#' #heatmap.genes
+#' ggrisk(data=LIRI,time='time',event='status',
+#'        heatmap.genes=c('GPR182','CENPA','BCO2'))
+#'
+#' #cutoff
+#' ggrisk(data=LIRI,time='time',event='status',
+#'        cutoff.value='median') #default
+#' ggrisk(data=LIRI,time='time',event='status',
+#'        cutoff.value='roc')
+#' ggrisk(data=LIRI,time='time',event='status',
+#'        cutoff.value='cutoff')
+#' ggrisk(data=LIRI,time='time',event='status',
+#'        cutoff.value=-1)
+#' ggrisk(data=LIRI,time='time',event='status',
+#'        cutoff.value='median',
+#'        cutoff.x = 145,
+#'        cutoff.y = -0.8)
+#' ggrisk(data=LIRI,time='time',event='status',
+#'        cutoff.value='median',
+#'        cutoff.x = 145,
+#'        cutoff.y = -0.8,
+#'        cutoff.label='This is cutoff')
+#'
+#' #code for 0 and 1
+#' ggrisk(data=LIRI,time='time',event='status',
+#'        cutoff.value='median',
+#'        cutoff.x = 145,
+#'        cutoff.y = -0.8,
+#'        code.0 = 'Still Alive',
+#'        code.1 = 'Already Dead')
+#'
+#' #code for high and low risk group
+#' ggrisk(data=LIRI,time='time',event='status',
+#'        cutoff.value='median',
+#'        cutoff.x = 145,
+#'        cutoff.y = -0.8,
+#'        code.0 = 'Still Alive',
+#'        code.1 = 'Already Dead',
+#'        code.highrisk = 'High Risk',
+#'        code.lowrisk = 'Low Risk')
+#' #title
+#' ggrisk(data=LIRI,time='time',event='status',
+#'        cutoff.value='median',
+#'        cutoff.x = 145,
+#'        cutoff.y = -0.8,
+#'        code.0 = 'Still Alive',
+#'        code.1 = 'Already Dead',
+#'        code.highrisk = 'High Risk',
+#'        code.lowrisk = 'Low Risk',
+#'        title.A.ylab='Risk Score',
+#'        title.B.ylab='Survival Time(year)',
+#'        title.A.legend='Risk Group',
+#'        title.B.legend='Status',
+#'        title.C.legend='Expression')
+#' #size
+#' ggrisk(data=LIRI,time='time',event='status',
+#'        cutoff.value='median',
+#'        cutoff.x = 145,
+#'        cutoff.y = -0.8,
+#'        code.0 = 'Still Alive',
+#'        code.1 = 'Already Dead',
+#'        code.highrisk = 'High Risk',
+#'        code.lowrisk = 'Low Risk',
+#'        title.A.ylab='Risk Score',
+#'        title.B.ylab='Survival Time(year)',
+#'        title.A.legend='Risk Group',
+#'        title.B.legend='Status',
+#'        title.C.legend='Expression',
+#'        size.ABC=1.5,
+#'        size.ylab.title=14,
+#'        size.Atext=11,
+#'        size.Btext=11,
+#'        size.Ctext=11,
+#'        size.yticks=0.5,
+#'        size.yline=0.5,
+#'        size.points=2,
+#'        size.dashline=1,
+#'        size.cutoff=5,
+#'        size.legendtitle=13,
+#'        size.legendtext=12)
+#' #color
+#' ggrisk(data=LIRI,time='time',event='status',
+#'        cutoff.value='median',
+#'        cutoff.x = 145,
+#'        cutoff.y = -0.8,
+#'        code.0 = 'Still Alive',
+#'        code.1 = 'Already Dead',
+#'        code.highrisk = 'High Risk',
+#'        code.lowrisk = 'Low Risk',
+#'        title.A.ylab='Risk Score',
+#'        title.B.ylab='Survival Time(year)',
+#'        title.A.legend='Risk Group',
+#'        title.B.legend='Status',
+#'        title.C.legend='Expression',
+#'        size.ABC=1.5,
+#'        size.ylab.title=14,
+#'        size.Atext=11,
+#'        size.Btext=11,
+#'        size.Ctext=11,
+#'        size.yticks=0.5,
+#'        size.yline=0.5,
+#'        size.points=2,
+#'        size.dashline=1,
+#'        size.cutoff=5,
+#'        size.legendtitle=13,
+#'        size.legendtext=12,
+#'        color.A=c(low='blue',high='red'),
+#'        color.B=c(code.0='blue',code.1='red'),
+#'        color.C=c(low='blue',median='white',high='red'))
+#'
+#' #vjust
+#' ggrisk(data=LIRI,time='time',event='status',
+#'        cutoff.value='median',
+#'        cutoff.x = 145,
+#'        cutoff.y = -0.8,
+#'        code.0 = 'Still Alive',
+#'        code.1 = 'Already Dead',
+#'        code.highrisk = 'High Risk',
+#'        code.lowrisk = 'Low Risk',
+#'        title.A.ylab='Risk Score',
+#'        title.B.ylab='Survival Time(year)',
+#'        title.A.legend='Risk Group',
+#'        title.B.legend='Status',
+#'        title.C.legend='Expression',
+#'        size.ABC=1.5,
+#'        size.ylab.title=14,
+#'        size.Atext=11,
+#'        size.Btext=11,
+#'        size.Ctext=11,
+#'        size.yticks=0.5,
+#'        size.yline=0.5,
+#'        size.points=2,
+#'        size.dashline=1,
+#'        size.cutoff=5,
+#'        size.legendtitle=13,
+#'        size.legendtext=12,
+#'        color.A=c(low='blue',high='red'),
+#'        color.B=c(code.0='blue',code.1='red'),
+#'        color.C=c(low='blue',median='white',high='red'),
+#'        vjust.A.ylab=1,
+#'        vjust.B.ylab=2)
+#'
+#' #family, expand, relative height
+#' ggrisk(data=LIRI,time='time',event='status',
+#'        cutoff.value='median',
+#'        cutoff.x = 145,
+#'        cutoff.y = -0.8,
+#'        code.0 = 'Still Alive',
+#'        code.1 = 'Already Dead',
+#'        code.highrisk = 'High Risk',
+#'        code.lowrisk = 'Low Risk',
+#'        title.A.ylab='Risk Score',
+#'        title.B.ylab='Survival Time(year)',
+#'        title.A.legend='Risk Group',
+#'        title.B.legend='Status',
+#'        title.C.legend='Expression',
+#'        size.ABC=1.5,
+#'        size.ylab.title=14,
+#'        size.Atext=11,
+#'        size.Btext=11,
+#'        size.Ctext=11,
+#'        size.yticks=0.5,
+#'        size.yline=0.5,
+#'        size.points=2,
+#'        size.dashline=1,
+#'        size.cutoff=5,
+#'        size.legendtitle=13,
+#'        size.legendtext=12,
+#'        color.A=c(low='blue',high='red'),
+#'        color.B=c(code.0='blue',code.1='red'),
+#'        color.C=c(low='blue',median='white',high='red'),
+#'        vjust.A.ylab=1,
+#'        vjust.B.ylab=2,
+#'        family='sans',
+#'        expand.x=3,
+#'        relative_heights=c(0.1,0.1,0.01,0.15))
+ggrisk <- function(data,time,event,heatmap.genes,
+                   code.0='Alive',
+                   code.1='Dead',
+                   code.highrisk='High',
+                   code.lowrisk='Low',
+                   cutoff.show=TRUE,
+                   cutoff.value='median',
+                   cutoff.x,
+                   cutoff.y,
+                   cutoff.label,
+                   title.A.ylab='Risk Score',
+                   title.B.ylab='Survival Time',
+                   title.A.legend='Risk Group',
+                   title.B.legend='Status',
+                   title.C.legend='Expression',
+                   size.ABC=1.5,
+                   size.ylab.title=14,
+                   size.Atext=11,
+                   size.Btext=11,
+                   size.Ctext=11,
+                   size.yticks=0.5,
+                   size.yline=0.5,
+                   size.points=2,
+                   size.dashline=1,
+                   size.cutoff=5,
+                   size.legendtitle=13,
+                   size.legendtext=12,
+                   color.A=c(low='blue',high='red'),
+                   color.B=c(code.0='blue',code.1='red'),
+                   color.C=c(low='blue',median='white',high='red'),
+                   vjust.A.ylab=1,
+                   vjust.B.ylab=2,
+                   family='sans',
+                   expand.x=3,
+                   relative_heights=c(0.1,0.1,0.01,0.15)) {
     #  1.regression
     x = do::inner_Add_Symbol(set::not(colnames(data), c(time, event)))
     formu = paste0('survival::Surv(', time, ',', event, ')~', x)
@@ -78,10 +269,10 @@ ggrisk <- function(data,time,event,
     data2 = cbind(data, riskscore)
     data3 = data2[order(data2$riskscore), ]
     #  4.cutoff
-    if (cutoff == 'roc') {
+    if (cutoff.value == 'roc') {
         cutoff.point = cutoff::roc(score = data3$riskscore,
                                    class = data3[,event])$cutoff
-    } else if (cutoff == 'cutoff') {
+    } else if (cutoff.value == 'cutoff') {
         rs = cutoff::cox(
             data = data3,
             time = time,
@@ -95,25 +286,29 @@ ggrisk <- function(data,time,event,
         fastStat::to.numeric(rs$p.adjust)=1
         cutoff.point = (rs$cut1[rs$p.adjust == min(rs$p.adjust)])
         if (length(cutoff.point)>1) cutoff.point=cutoff.point[1]
-    } else if (cutoff == 'median') {
+    } else if (cutoff.value == 'median') {
         cutoff.point=median(x = data3$riskscore,na.rm = TRUE)
     }else{
-        cutoff.point=cutoff
+        cutoff.point=cutoff.value
     }
     if (cutoff.point < min(riskscore) || cutoff.point>max(riskscore)){
         stop('cutoff must between ',min(riskscore),' and ',max(riskscore))
     }
     # 5.risk for low and high
-    type = cutoff::roc(score = data3$riskscore,
-                       class = data3[,event])$type
-    if (type == 'positive classification') {
+    reg_cph=suppressWarnings(rms::cph(formula = as.formula(formu), data = data,surv=TRUE))
+    df2=nomogramFormula::prob_cal(reg = reg_cph,times = median(data3[,time],na.rm = TRUE))
+    #plot(x=df2$linear.predictors,df2[,2])
+    correlaiton=cor(df2[,1],df2[,2],method = 'spearman')
+    if (correlaiton<0) {
+        #correlaiton <0, meaning that high-score is shorter life, high risk
         `Risk Group` = ifelse(data3$riskscore > cutoff.point,code.highrisk,code.lowrisk)
     } else{
+        #correlaiton>0 means that low-scoe is high-risk
         `Risk Group` = ifelse(data3$riskscore < cutoff.point,code.highrisk,code.lowrisk)
     }
     data4 = cbind(data3, `Risk Group`)
     cut.position=(1:nrow(data4))[data4$riskscore == cutoff.point]
-    if (length(cut.position)==1){
+    if (length(cut.position)==0){
         cut.position=which.min(abs(data4$riskscore - cutoff.point))
     }else if (length(cut.position)>1){
         cut.position=cut.position[length(cut.position)]
@@ -122,98 +317,100 @@ ggrisk <- function(data,time,event,
     data4[, time]=round(data4[, time],1)
     #figure A risk plot
     #rearange colorA
-    color$A=c(color$A['low'],color$A['high'])
-    names(color$A)=c(code.lowrisk,code.highrisk)
+    color.A=c(color.A['low'],color.A['high'])
+    names(color.A)=c(code.lowrisk,code.highrisk)
     fA = ggplot(data = data4,
-                         aes_string(
-                             x = 1:nrow(data4),
-                             y = data4$riskscore,
-                             color=factor(`Risk Group`)
-                             )
-                         ) +
-        geom_point(size = size$AB.points) +
-        scale_color_manual(name=legend.title['A'],values = color$A) +
+                aes_string(
+                    x = 1:nrow(data4),
+                    y = data4$riskscore,
+                    color=factor(`Risk Group`)
+                    )
+                ) +
+        geom_point(size = size.points) +
+        scale_color_manual(name=title.A.legend,values = color.A) +
         geom_vline(
             xintercept = cut.position,
             linetype = 'dotted',
-            size = size$dashline
+            size = size.dashline
         ) +
+        #bg
         theme(
             panel.grid = element_blank(),
-            panel.background = element_blank(),
+            panel.background = element_blank())+
+        #x-axis
+        theme(
             axis.ticks.x = element_blank(),
             axis.line.x = element_blank(),
             axis.text.x = element_blank(),
-            axis.text.y=element_text(family = family,size=15),
-            axis.title.x = element_blank(),
-            axis.title.y = element_text(size = size$ylab.title)
+            axis.title.x = element_blank()
         ) +
-        theme(axis.line.y = element_line(colour = "black",size=size$yline),
-              axis.text.y = element_text(size=size$ytext),
-              axis.ticks.y = element_line(size = size$yticks))+
-        theme(legend.title = element_text(size = size$legendtitle,
-                                          family = family),
-              legend.text = element_text(size=size$legendtext,
-                                         family = family))+
+        #y-axis
+        theme(
+            axis.title.y = element_text(
+                size = size.ylab.title,vjust = vjust.A.ylab,angle = 90,family=family),
+            axis.text.y = element_text(size=size.Atext,family = family),
+            axis.line.y = element_line(size=size.yline,colour = "black"),
+            axis.ticks.y = element_line(size = size.yticks,colour = "black"))+
+        #legend
+        theme(legend.title = element_text(size = size.legendtitle,family = family),
+              legend.text = element_text(size=size.legendtext,family = family))+
         coord_trans()+
-        ylab(ylab.title['A'])+
-        theme(axis.title.y = element_text(
-            angle = 90,
-            family=family,
-            vjust = ylab.vjust['A'])
-        )+
-        scale_x_continuous(expand = c(0,0.4))
+        ylab(title.A.ylab)+
+        scale_x_continuous(expand = c(0,expand.x))
     fA
-    if (cutoff.show$show){
+    if (cutoff.show){
+        if (missing(cutoff.label)) cutoff.label=paste0('cutoff: ',round(cutoff.point,2))
+        if (missing(cutoff.x)) cutoff.x=cut.position+3
+        if (missing(cutoff.y)) cutoff.y=cutoff.point
         fA=fA+ annotate("text",
-                    x=ifelse(is.null(cutoff.show$x),
-                             cut.position+3,cutoff.show$x),
-                    y=ifelse(is.null(cutoff.show$y),cutoff.point,cutoff.show$y),
-                    label=paste0('cutoff: ',
-                               round(cutoff.point,2)),
+                    x=cutoff.x,
+                    y=cutoff.y,
+                    label=cutoff.label,
                     family=family,
+                    size=size.cutoff,
                     fontface="plain",
-                    colour="black",
-                    size=size$cutoff)
+                    colour="black")
     }
+    fA
     #fB
-    #forB is the y lab style
-    forB=fA$theme$axis.title.y
-    forB$vjust=ylab.vjust['B']
-    color$B=c(color$B['code0'],color$B['code1'])
-    names(color$B)=c(code0,code1)
+    color.B=c(color.B['code.0'],color.B['code.1'])
+    names(color.B)=c(code.0,code.1)
     fB=ggplot(data = data4,
                        aes_string(
                            x = 1:nrow(data4),
                            y = data4[, time],
-                           color=factor(ifelse(data4[,event]==1,code1,code0)))
+                           color=factor(ifelse(data4[,event]==1,code.1,code.0)))
                        ) +
-        geom_point(size=size$AB.points)+
-        scale_color_manual(name=legend.title['B'],values = color$B) +
+        geom_point(size=size.points)+
+        scale_color_manual(name=title.B.legend,values = color.B) +
         geom_vline(
             xintercept = cut.position,
             linetype = 'dotted',
-            size = size$dashline
+            size = size.dashline
         )  +
         theme(
             panel.grid = element_blank(),
-            panel.background = element_blank(),
+            panel.background = element_blank())+
+        #x a-xis
+        theme(
             axis.ticks.x = element_blank(),
             axis.line.x = element_blank(),
             axis.text.x = element_blank(),
-            axis.title.x = element_blank(),
-            axis.text.y=element_text(family = family,size=15),
-            axis.title.y = element_text(size = size$ylab.title)
+            axis.title.x = element_blank()
         ) +
-        theme(axis.line.y = element_line(colour = "black",size=size$yline),
-              axis.text.y = element_text(size=size$ytext),
-              axis.ticks.y = element_line(size = size$yticks))+
-        theme(legend.title = element_text(size = size$legendtitle,family = family),
-              legend.text = element_text(size=size$legendtext,family = family))+
-        ylab(ylab.title['B'])+
-        theme(axis.title.y = forB)+
+        #y-axis
+        theme(
+            axis.title.y = element_text(
+                size = size.ylab.title,vjust = vjust.B.ylab,angle = 90,family=family),
+            axis.text.y = element_text(size=size.Btext,family = family),
+            axis.ticks.y = element_line(size = size.yticks),
+            axis.line.y = element_line(size=size.yline,colour = "black")
+            )+
+        theme(legend.title = element_text(size = size.legendtitle,family = family),
+              legend.text = element_text(size=size.legendtext,family = family))+
+        ylab(title.B.ylab)+
         coord_trans()+
-        scale_x_continuous(expand = c(0,0.4))
+        scale_x_continuous(expand = c(0,expand.x))
     fB
     # middle
     middle = ggplot(data4, aes(
@@ -221,7 +418,7 @@ ggrisk <- function(data,time,event,
         y = 1)
         ) +
         geom_tile(aes(fill = data4$`Risk Group`))+
-        scale_fill_manual(name=legend.title['A'],values = color$A)+
+        scale_fill_manual(name=title.A.legend,values = color.A)+
         theme(
             panel.grid = element_blank(),
             panel.background = element_blank(),
@@ -231,27 +428,27 @@ ggrisk <- function(data,time,event,
             axis.title = element_blank(),
             plot.margin = unit(c(0.15,0,-0.3,0), "cm")
         )+
-        theme(legend.title = element_text(size = size$legendtitle,family = family),
-              legend.text = element_text(size=size$legendtext,family = family))+
-        scale_x_continuous(expand = c(0,0.4))
+        theme(legend.title = element_text(size = size.legendtitle,family = family),
+              legend.text = element_text(size=size.legendtext,family = family))+
+        scale_x_continuous(expand = c(0,expand.x))
     middle
     #fC
-    data5 = data4[, set::not(colnames(data4), c(time, event,
-                                                'Risk Group',
-                                                'riskscore'))]
+    if (missing(heatmap.genes))  heatmap.genes=set::not(colnames(data4),
+                                                        c(time, event,
+                                                          'Risk Group',
+                                                          'riskscore'))
+    data5 = data4[,heatmap.genes]
+    if (length(heatmap.genes)==1){
+        data5=data.frame(data5)
+        colnames(data5)=heatmap.genes
+    }
     for (i in 1:ncol(data5)) {
         data5[, i] = (data5[, i] - mean(data5[, i], na.rm = TRUE)) / sd(data5[, i], na.rm = TRUE)
     }
     data6 = cbind(id = 1:nrow(data5), data5)
     data7 = do::reshape_toLong(data = data6,
                                var.names = colnames(data5))
-    A.style=fA$theme$axis.title.y
-    A.style$family=family
-    A.style$angle=0
-    A.style$vjust=NULL
-    fC = ggplot(data7, aes_string(x = 'id',
-                                           y = 'variable',
-                                           fill = 'value')) +
+    fC = ggplot(data7, aes_string(x = 'id',y = 'variable',fill = 'value')) +
         geom_raster() +
         theme(
             panel.grid = element_blank(),
@@ -263,15 +460,15 @@ ggrisk <- function(data,time,event,
             plot.background = element_blank() #the key to avoide legend overlap
         ) +
         scale_fill_gradient2(
-            name = legend.title['C'],
-            low = color$C[1],
-            mid = color$C[2],
-            high = color$C[3]
+            name = title.C.legend,
+            low = color.C[1],
+            mid = color.C[2],
+            high = color.C[3]
         ) +
-        theme(axis.text = A.style)+
-        theme(legend.title = element_text(size = size$legendtitle,family = family),
-              legend.text = element_text(size=size$legendtext,family = family))+
-        scale_x_continuous(expand = c(0,0.4))
+        theme(axis.text = element_text(size=size.Ctext,family = family))+
+        theme(legend.title = element_text(size = size.legendtitle,family = family),
+              legend.text = element_text(size=size.legendtext,family = family))+
+        scale_x_continuous(expand = c(0,expand.x))
     fC
     egg::ggarrange(
         fA,
@@ -280,8 +477,9 @@ ggrisk <- function(data,time,event,
         fC,
         ncol = 1,
         labels = c('A', 'B', 'C', ''),
-        label.args = list(gp = grid::gpar(font = 2, cex =size$ABC,
+        label.args = list(gp = grid::gpar(font = 2,
+                                          cex =size.ABC,
                                           family=family)),
-        heights = height.ratio
+        heights = relative_heights
     )
 }
