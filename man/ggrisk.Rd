@@ -2,7 +2,7 @@
 % Please edit documentation in R/ggrisk.R
 \name{ggrisk}
 \alias{ggrisk}
-\title{Riskscore Plot for Cox Regression}
+\title{Risk Score Plot for Cox Regression}
 \usage{
 ggrisk(data, time, event, heatmap.genes, code.0 = "Alive",
   code.1 = "Dead", code.highrisk = "High", code.lowrisk = "Low",
@@ -46,7 +46,7 @@ ggrisk(data, time, event, heatmap.genes, code.0 = "Alive",
 
 \item{cutoff.label}{(should be) string. Define cutoff label by yourself}
 
-\item{title.A.ylab}{string, y-lab title for figure A. Default is 'Riskscore'}
+\item{title.A.ylab}{string, y-lab title for figure A. Default is 'Risk Score'}
 
 \item{title.B.ylab}{string, y-lab title for figure B. Default is 'Survival Time'}
 
@@ -97,10 +97,10 @@ ggrisk(data, time, event, heatmap.genes, code.0 = "Alive",
 \item{relative_heights}{numeric, relative heights for figure A, B, colored side bar and heatmap. Default is 0.1 0.1 0.01 and 0.15}
 }
 \value{
-A riskscore picture
+A risk score picture
 }
 \description{
-Riskscore Plot for Cox Regression
+Risk Score Plot for Cox Regression
 }
 \examples{
 #plot

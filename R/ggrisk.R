@@ -1,4 +1,4 @@
-#' @title Riskscore Plot for Cox Regression
+#' @title Risk Score Plot for Cox Regression
 #' @param data dataframe data
 #' @param time numeric variable. Name for following time
 #' @param event must be numeric variable. Name for event, which must be coded as 0 and 1
@@ -12,7 +12,7 @@
 #' @param cutoff.x numeric (optional), ordination x for cutoff text
 #' @param cutoff.y numeric (optional), ordination y for cutoff text
 #' @param cutoff.label (should be) string. Define cutoff label by yourself
-#' @param title.A.ylab string, y-lab title for figure A. Default is 'Riskscore'
+#' @param title.A.ylab string, y-lab title for figure A. Default is 'Risk Score'
 #' @param title.B.ylab string, y-lab title for figure B. Default is 'Survival Time'
 #' @param title.A.legend string, legend title for figure A. Default is 'Risk Group'
 #' @param title.B.legend string, legend title for figure B. Default is 'Status'
@@ -41,7 +41,7 @@
 #' @importFrom ggplot2 ylab geom_tile unit scale_fill_gradient2 scale_x_continuous geom_raster theme_classic annotate
 #' @importFrom ggplot2 scale_color_manual element_line scale_fill_manual ggplot scale_fill_manual
 #' @importFrom stats as.formula median sd cor
-#' @return A riskscore picture
+#' @return A risk score picture
 #' @export
 #'
 #' @examples

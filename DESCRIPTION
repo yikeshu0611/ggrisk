@@ -1,5 +1,5 @@
 Package: ggrisk
-Title: Riskscore Plot for Cox Regression
+Title: Risk Score Plot for Cox Regression
 Version: 1.0
 Authors@R: 
     c(
