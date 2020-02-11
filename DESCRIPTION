@@ -1,34 +1,22 @@
-Package: ggrisk
-Title: Risk Score Plot for Cox Regression
+Package: mapit
+Title: Heat Map, Bubble Map and Migration Map
 Version: 1.0
 Authors@R: 
     c(
     person("Jing","Zhang",role = c("aut", "cre"),email = "zj391120@163.com"),
     person("Zhi", "Jin", role="aut")
     )
-Description: The risk plot may be one of the most commonly used figures in 
-    tumor genetic data analysis. We can conclude the following two points: 
-    Comparing the prediction results of the model with the real survival situation 
-    to see whether the survival rate of the high-risk group is lower than that of the 
-    low-level group, and whether the survival time of the high-risk group is 
-    shorter than that of the low-risk group. The other is to compare the heat 
-    map and scatter plot to see the correlation between the predictors and the 
-    outcome.
+Description: Plot heat map, bubble map and migration map.
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
+Depends: 
+    R (>= 2.10),
+    ggplot2
 RoxygenNote: 6.1.1
-Depends: R (>= 2.10)
 Imports: 
-    ggplot2,
-    survival,
-    egg,
     do,
-    set,
-    cutoff,
-    fastStat,
-    grid,
-    rms,
-    nomogramFormula
-URL: https://github.com/yikeshu0611/ggrisk
-BugReports: https://github.com/yikeshu0611/ggrisk/issues
+    cowplot,
+    tmcn,
+    ggrepel,
+    crayon
